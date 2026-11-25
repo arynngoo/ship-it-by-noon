@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Lift Log</title>
+<style>
+  body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
+  input, button { font-size: 16px; padding: 6px 10px; }
+  table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+  th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+</style>
+</head>
+<body>
+  <h1>Lift Log</h1>
+  <p>Enter an exercise to see your best weight each session.</p>
+  <form id="form">
+    <input id="exercise" placeholder="Bench Press">
+    <button>Search</button>
+  </form>
+  <table>
+    <thead><tr><th>Date</th><th>Best weight (lbs)</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+
+<script>
+document.getElementById('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const exercise = document.getElementById('exercise').value;
+  const res = await fetch('/api/progress?exercise=' + encodeURIComponent(exercise));
+  const data = await res.json();
+  const tbody = document.getElementById('rows');
+  tbody.innerHTML = '';
+  if (!res.ok || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2">No results</td></tr>';
+    return;
+  }
+  for (const row of data) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${row.session_date.slice(0, 10)}</td><td>${row.best_weight}</td>`;
+    tbody.appendChild(tr);
+  }
+});
+</script>
+</body>
+</html>
